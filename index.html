@@ -72,19 +72,24 @@
   }
 
   /* ---------- START ---------- */
-  .hero-badge{position:relative;text-align:center;margin-bottom:6px;}
+  .hero-badge{position:relative;text-align:center;margin:30px 0 6px;}
   .sunrays{
-    position:absolute;top:50%;left:50%;width:340px;height:340px;
+    position:absolute;top:50%;left:50%;width:356px;height:356px;max-width:92vw;
     transform:translate(-50%,-50%);z-index:0;
-    background:repeating-conic-gradient(from 0deg, var(--gold) 0deg 8deg, transparent 8deg 16deg);
-    border-radius:50%;filter:blur(.3px);opacity:.5;
-    animation:spin 26s linear infinite;
-    -webkit-mask-image:radial-gradient(circle, #000 30%, transparent 62%);
-            mask-image:radial-gradient(circle, #000 30%, transparent 62%);
+    background:url("assets/img/kz-shanyrak.png") center/contain no-repeat;
+    opacity:.95;filter:drop-shadow(3px 4px 0 rgba(21,26,58,.15));
+    animation:spin 70s linear infinite;
   }
   @keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg);}}
+  @keyframes spin2{to{transform:rotate(360deg);}}
   .mascot{position:relative;z-index:1;width:230px;max-width:64vw;filter:drop-shadow(4px 6px 0 rgba(21,26,58,.25));animation:bob 3.2s ease-in-out infinite;}
   @keyframes bob{0%,100%{transform:translateY(0) rotate(-1.5deg);}50%{transform:translateY(-12px) rotate(1.5deg);}}
+  /* Kazakh ornament */
+  .kz-divider{display:block;width:min(320px,72%);height:auto;margin:16px auto 6px;filter:drop-shadow(2px 3px 0 rgba(21,26,58,.16));}
+  .bg-shanyrak{position:fixed;z-index:-1;pointer-events:none;width:72vw;max-width:780px;height:72vw;max-height:780px;
+    background:url("assets/img/kz-shanyrak.png") center/contain no-repeat;opacity:.06;animation:spin2 140s linear infinite;}
+  .bg-shanyrak.tr{top:-24vw;right:-22vw;}
+  .bg-shanyrak.bl{bottom:-26vw;left:-24vw;animation-direction:reverse;}
 
   h1.title{
     font-family:'Bangers',cursive;font-weight:400;letter-spacing:1.5px;
@@ -210,6 +215,7 @@
 </head>
 <body>
 <div class="bg-blobs"><span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span><span class="blob b4"></span></div>
+<div class="bg-shanyrak tr"></div><div class="bg-shanyrak bl"></div>
 <canvas id="confetti"></canvas>
 <button id="soundBtn" title="Sound on/off" aria-label="Toggle sound">🔊</button>
 
@@ -223,6 +229,7 @@
     </div>
     <h1 class="title">HOW <span class="k">KAZAKH</span><br/>ARE YOU?</h1>
     <p class="subtitle">10 questions. One official verdict. <span class="wink">No Borat jokes… okay maybe one.</span> 🇰🇿</p>
+    <img class="kz-divider" src="assets/img/kz-divider.png" alt="" />
     <div class="card">
       <label class="field-label" for="nameInput">What should we call you, batyr?</label>
       <input id="nameInput" type="text" maxlength="24" placeholder="Your name…" autocomplete="off" />
@@ -270,11 +277,13 @@
       <p class="persona-blurb" id="personaBlurb"></p>
     </div>
 
+    <img class="kz-divider" src="assets/img/kz-divider.png" alt="" />
     <div class="card radar-card">
       <h3>Your Kazakhstani DNA 🧬</h3>
       <svg class="radar" id="radar" viewBox="0 0 300 300" role="img" aria-label="Radar chart of your scores"></svg>
     </div>
 
+    <img class="kz-divider" src="assets/img/kz-divider.png" alt="" />
     <div class="card facts-card">
       <h3>Kazakhstan, real quick 🇰🇿</h3>
       <ul class="facts-list" id="factsList"></ul>
