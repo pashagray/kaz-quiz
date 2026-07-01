@@ -90,6 +90,18 @@
     background:url("assets/img/kz-shanyrak.png") center/contain no-repeat;opacity:.06;animation:spin2 140s linear infinite;}
   .bg-shanyrak.tr{top:-24vw;right:-22vw;}
   .bg-shanyrak.bl{bottom:-26vw;left:-24vw;animation-direction:reverse;}
+  /* gender toggle */
+  .gender-row{display:flex;gap:12px;margin:0 0 16px;}
+  .gender-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;
+    font-family:inherit;font-weight:900;font-size:17px;color:var(--ink);
+    background:#fff;border:3px solid var(--ink);border-radius:16px;padding:13px 10px;cursor:pointer;
+    box-shadow:var(--shadow-sm);transition:transform .12s cubic-bezier(.22,1.4,.5,1),box-shadow .12s ease,background .15s ease;}
+  .gender-btn span{font-weight:800;font-size:12px;text-transform:uppercase;letter-spacing:.5px;opacity:.6;}
+  .gender-btn:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--ink);}
+  .gender-btn:active{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--ink);}
+  .gender-btn.selected[data-g="m"]{background:var(--sky);color:#fff;}
+  .gender-btn.selected[data-g="f"]{background:var(--pink);color:#fff;}
+  .gender-btn.selected span{opacity:.85;}
 
   h1.title{
     font-family:'Bangers',cursive;font-weight:400;letter-spacing:1.5px;
@@ -231,7 +243,12 @@
     <p class="subtitle">10 questions. One official verdict. <span class="wink">No Borat jokes… okay maybe one.</span> 🇰🇿</p>
     <img class="kz-divider" src="assets/img/kz-divider.png" alt="" />
     <div class="card">
-      <label class="field-label" for="nameInput">What should we call you, batyr?</label>
+      <div class="field-label">Who's taking the test?</div>
+      <div class="gender-row">
+        <button type="button" class="gender-btn selected" data-g="m">👨 Batyr <span>male</span></button>
+        <button type="button" class="gender-btn" data-g="f">👩 Aru <span>female</span></button>
+      </div>
+      <label class="field-label" id="nameLabel" for="nameInput">What should we call you, batyr?</label>
       <input id="nameInput" type="text" maxlength="24" placeholder="Your name…" autocomplete="off" />
       <button id="startBtn" class="btn pink pulse">LET'S GO ➜</button>
       <div class="tag-row">
@@ -413,15 +430,20 @@
   ];
 
   var PERSONAS = [
-    { min:0,  name:"Freshly Landed Tourist", emoji:"🧳", img:"assets/img/persona-tourist.png",
+    { min:0,  name:"Freshly Landed Tourist", emoji:"🧳",
+      imgM:"assets/img/persona-tourist-m.png", imgF:"assets/img/persona-tourist-f.png",
       blurb:"You just landed and you're holding the map upside down. But hey — you showed up, and in Kazakhstan a guest is sacred. Grab some tea, we've got a LOT to show you." },
-    { min:25, name:"Curious Guest", emoji:"👀", img:"assets/img/persona-curious.png",
+    { min:25, name:"Curious Guest", emoji:"👀",
+      imgM:"assets/img/persona-curious-m.png", imgF:"assets/img/persona-curious-f.png",
       blurb:"You're asking the right questions and you've braved the tea. A few more toi invitations and you'll be one of us. Keep going!" },
-    { min:45, name:"Honorary Dastarkhan Guest", emoji:"🍽️", img:"assets/img/persona-dastarkhan.png",
+    { min:45, name:"Honorary Dastarkhan Guest", emoji:"🍽️",
+      imgM:"assets/img/persona-dastarkhan-m.png", imgF:"assets/img/persona-dastarkhan-f.png",
       blurb:"You've earned a permanent seat at the table. You know the food, you respect the elders, and you'd never refuse a second helping. Honorary local: granted." },
-    { min:65, name:"Certified City Qazaq", emoji:"😎", img:"assets/img/persona-city.png",
+    { min:65, name:"Certified City Qazaq", emoji:"😎",
+      imgM:"assets/img/persona-city-m.png", imgF:"assets/img/persona-city-f.png",
       blurb:"Sunglasses on, coffee in hand, Astana skyline behind you — you're basically a local. You just might need to brush up on the old folk songs." },
-    { min:85, name:"True Nomad Ağa", emoji:"🦅", img:"assets/img/persona-nomad.png",
+    { min:85, name:"True Nomad Ağa", nameF:"True Nomad Apa", emoji:"🦅",
+      imgM:"assets/img/persona-nomad-m.png", imgF:"assets/img/persona-nomad-f.png",
       blurb:"Steppe blood, eagle on your arm, dombra in your soul. You ARE Kazakhstan. Apart apples and kumys flow through your veins. Alga!" }
   ];
 
@@ -434,7 +456,7 @@
   ];
 
   /* ---------------- STATE ---------------- */
-  var state = { name:"", idx:0, total:0, maxTotal:0, dim:{}, dimMax:{}, muted:false };
+  var state = { name:"", gender:"m", idx:0, total:0, maxTotal:0, dim:{}, dimMax:{}, muted:false };
   QUESTIONS.forEach(function(q){
     var best = Math.max.apply(null, q.options.map(function(o){return o.pts;}));
     q._best = best;
@@ -611,8 +633,10 @@
     // persona
     var p=PERSONAS[0];
     for(var i=0;i<PERSONAS.length;i++){ if(pct>=PERSONAS[i].min) p=PERSONAS[i]; }
-    $("personaName").textContent = p.emoji+" "+p.name;
-    $("personaImg").src = p.img;
+    var isF = state.gender==="f";
+    var pname = (isF && p.nameF) ? p.nameF : p.name;
+    $("personaName").textContent = p.emoji+" "+pname;
+    $("personaImg").src = isF ? p.imgF : p.imgM;
     $("personaBlurb").textContent = p.blurb;
 
     // facts
@@ -623,7 +647,7 @@
       fl.appendChild(li);
     });
 
-    state._pct=pct; state._persona=p;
+    state._pct=pct; state._persona=p; state._pname=pname;
     show("screen-result");
 
     // animate count up
@@ -714,7 +738,7 @@
   function shareResult(){
     sfxClick();
     var who=state.name? state.name+" is" : "I'm";
-    var txt=who+" "+state._pct+"% Kazakhstani — \""+state._persona.name+"\" "+state._persona.emoji+"! 🇰🇿 How Kazakh are YOU? "+location.href;
+    var txt=who+" "+state._pct+"% Kazakhstani — \""+state._pname+"\" "+state._persona.emoji+"! 🇰🇿 How Kazakh are YOU? "+location.href;
     if(navigator.clipboard && navigator.clipboard.writeText){
       navigator.clipboard.writeText(txt).then(showToast, function(){ fallbackCopy(txt); });
     } else { fallbackCopy(txt); }
@@ -730,6 +754,17 @@
   }
 
   /* ---------------- WIRING ---------------- */
+  var genderBtns=document.querySelectorAll(".gender-btn");
+  genderBtns.forEach(function(b){
+    b.addEventListener("click",function(){
+      state.gender=b.getAttribute("data-g");
+      genderBtns.forEach(function(x){ x.classList.toggle("selected", x===b); });
+      var lab=$("nameLabel");
+      if(lab) lab.textContent = state.gender==="f" ? "What should we call you, aru?" : "What should we call you, batyr?";
+      audio(); sfxClick();
+    });
+  });
+
   $("startBtn").addEventListener("click",function(){
     audio(); // unlock on gesture
     state.name=($("nameInput").value||"").trim().slice(0,24);
