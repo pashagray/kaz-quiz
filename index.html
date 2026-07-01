@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>How Kazakh Are You? 🇰🇿</title>
+<meta name="description" content="A fun pop-art quiz: find out how much of a Kazakhstani you really are." />
+<meta property="og:title" content="How Kazakh Are You? 🇰🇿" />
+<meta property="og:description" content="Take the quiz and get your official Kazakhstani percentage!" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --sky:#12b5e5;
+    --sky-deep:#0090c8;
+    --gold:#ffd100;
+    --ink:#151a3a;
+    --pink:#ff3d8b;
+    --purple:#7c4dff;
+    --green:#26e07a;
+    --cream:#fff3d6;
+    --shadow: 7px 7px 0 var(--ink);
+    --shadow-sm: 4px 4px 0 var(--ink);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Nunito',system-ui,sans-serif;
+    color:var(--ink);
+    background:var(--cream);
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  /* animated pop-art background */
+  .bg-blobs{position:fixed;inset:0;z-index:-2;overflow:hidden;}
+  .blob{position:absolute;border-radius:50%;filter:blur(8px);opacity:.55;mix-blend-mode:multiply;}
+  .blob.b1{width:46vw;height:46vw;background:var(--sky);top:-8vw;left:-8vw;animation:float1 16s ease-in-out infinite;}
+  .blob.b2{width:40vw;height:40vw;background:var(--pink);bottom:-10vw;right:-6vw;animation:float2 19s ease-in-out infinite;}
+  .blob.b3{width:34vw;height:34vw;background:var(--gold);top:40%;right:20%;animation:float3 22s ease-in-out infinite;}
+  .blob.b4{width:30vw;height:30vw;background:var(--purple);bottom:20%;left:8%;animation:float1 18s ease-in-out infinite reverse;}
+  @keyframes float1{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(6vw,4vw) scale(1.12);}}
+  @keyframes float2{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(-5vw,-5vw) scale(1.15);}}
+  @keyframes float3{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(-4vw,5vw) scale(.9);}}
+  /* halftone dots overlay */
+  body::before{
+    content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+    background-image:radial-gradient(var(--ink) 1.4px, transparent 1.5px);
+    background-size:22px 22px;opacity:.06;
+  }
+
+  #confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:60;}
+
+  .wrap{max-width:640px;margin:0 auto;padding:20px 18px 60px;position:relative;z-index:1;}
+
+  /* sound toggle */
+  #soundBtn{
+    position:fixed;top:14px;right:14px;z-index:70;
+    width:52px;height:52px;border-radius:50%;
+    border:3px solid var(--ink);background:#fff;box-shadow:var(--shadow-sm);
+    font-size:22px;cursor:pointer;transition:transform .12s ease;
+  }
+  #soundBtn:active{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--ink);}
+
+  .screen{display:none;animation:screenIn .45s cubic-bezier(.22,1.4,.5,1) both;}
+  .screen.active{display:block;}
+  @keyframes screenIn{from{opacity:0;transform:translateY(24px) scale(.97);}to{opacity:1;transform:none;}}
+
+  .card{
+    background:#fff;border:4px solid var(--ink);border-radius:26px;
+    box-shadow:var(--shadow);padding:26px 22px;
+  }
+
+  /* ---------- START ---------- */
+  .hero-badge{position:relative;text-align:center;margin-bottom:6px;}
+  .sunrays{
+    position:absolute;top:50%;left:50%;width:340px;height:340px;
+    transform:translate(-50%,-50%);z-index:0;
+    background:repeating-conic-gradient(from 0deg, var(--gold) 0deg 8deg, transparent 8deg 16deg);
+    border-radius:50%;filter:blur(.3px);opacity:.5;
+    animation:spin 26s linear infinite;
+    -webkit-mask-image:radial-gradient(circle, #000 30%, transparent 62%);
+            mask-image:radial-gradient(circle, #000 30%, transparent 62%);
+  }
+  @keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg);}}
+  .mascot{position:relative;z-index:1;width:230px;max-width:64vw;filter:drop-shadow(4px 6px 0 rgba(21,26,58,.25));animation:bob 3.2s ease-in-out infinite;}
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(-1.5deg);}50%{transform:translateY(-12px) rotate(1.5deg);}}
+
+  h1.title{
+    font-family:'Bangers',cursive;font-weight:400;letter-spacing:1.5px;
+    font-size:clamp(44px,12vw,78px);line-height:.92;margin:8px 0 4px;text-align:center;
+    color:var(--gold);
+    text-shadow:
+      3px 3px 0 var(--ink),
+      -2px -2px 0 var(--sky),
+      6px 6px 0 rgba(21,26,58,.25);
+  }
+  h1.title .k{color:var(--sky);}
+  .subtitle{text-align:center;font-weight:800;font-size:clamp(15px,4.4vw,19px);margin:2px 0 20px;color:var(--ink);}
+  .subtitle .wink{color:var(--pink);}
+
+  .field-label{font-weight:900;text-transform:uppercase;letter-spacing:1px;font-size:13px;margin:4px 2px 8px;display:block;}
+  input[type=text]{
+    width:100%;padding:15px 16px;font-size:18px;font-family:inherit;font-weight:800;color:var(--ink);
+    border:3px solid var(--ink);border-radius:16px;box-shadow:var(--shadow-sm);outline:none;background:#fff;
+  }
+  input[type=text]:focus{border-color:var(--sky);}
+  input::placeholder{color:#9aa0c0;font-weight:700;}
+
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:10px;
+    font-family:'Bangers',cursive;font-weight:400;letter-spacing:1.5px;
+    font-size:clamp(22px,6vw,30px);line-height:1;
+    padding:16px 26px;border:4px solid var(--ink);border-radius:20px;cursor:pointer;
+    background:var(--gold);color:var(--ink);box-shadow:var(--shadow);
+    transition:transform .12s cubic-bezier(.22,1.4,.5,1), box-shadow .12s ease;
+    width:100%;margin-top:18px;
+  }
+  .btn:hover{transform:translate(-3px,-3px);box-shadow:10px 10px 0 var(--ink);}
+  .btn:active{transform:translate(3px,3px);box-shadow:2px 2px 0 var(--ink);}
+  .btn.sky{background:var(--sky);color:#fff;}
+  .btn.pink{background:var(--pink);color:#fff;}
+  .btn.pulse{animation:pulse 1.8s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{box-shadow:var(--shadow);}50%{box-shadow:7px 7px 0 var(--ink),0 0 0 6px rgba(255,61,139,.25);}}
+
+  .tag-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:16px;}
+  .tag{font-weight:900;font-size:12px;text-transform:uppercase;letter-spacing:.6px;background:#fff;border:2.5px solid var(--ink);border-radius:999px;padding:6px 12px;box-shadow:2px 2px 0 var(--ink);}
+
+  /* ---------- QUIZ ---------- */
+  .progress-wrap{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+  .progress-track{flex:1;height:18px;background:#fff;border:3px solid var(--ink);border-radius:999px;overflow:hidden;box-shadow:var(--shadow-sm);}
+  .progress-fill{height:100%;width:0;background:linear-gradient(90deg,var(--sky),var(--pink),var(--gold));border-radius:999px;transition:width .5s cubic-bezier(.22,1.4,.5,1);}
+  .q-count{font-family:'Bangers',cursive;font-size:22px;letter-spacing:1px;white-space:nowrap;}
+  .q-count b{color:var(--pink);font-size:26px;}
+
+  .q-emoji{font-size:52px;text-align:center;line-height:1;margin:2px 0 6px;animation:pop .5s cubic-bezier(.22,1.6,.5,1) both;}
+  @keyframes pop{from{transform:scale(0) rotate(-15deg);}to{transform:scale(1) rotate(0);}}
+  .q-dim{text-align:center;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;font-size:12px;color:var(--purple);margin-bottom:6px;}
+  .q-text{font-weight:900;font-size:clamp(20px,5.4vw,26px);line-height:1.2;text-align:center;margin:0 0 20px;}
+
+  .answers{display:flex;flex-direction:column;gap:12px;}
+  .answer{
+    display:flex;align-items:center;gap:12px;text-align:left;width:100%;
+    font-family:inherit;font-weight:800;font-size:17px;color:var(--ink);
+    background:#fff;border:3px solid var(--ink);border-radius:16px;padding:14px 16px;cursor:pointer;
+    box-shadow:var(--shadow-sm);transition:transform .12s cubic-bezier(.22,1.4,.5,1),box-shadow .12s ease,background .2s ease;
+  }
+  .answer .a-key{flex:0 0 34px;height:34px;display:grid;place-items:center;border-radius:10px;background:var(--cream);border:2.5px solid var(--ink);font-family:'Bangers',cursive;font-size:20px;}
+  .answer:not(.locked):hover{transform:translate(-3px,-3px);box-shadow:7px 7px 0 var(--ink);background:#fffdf3;}
+  .answer:not(.locked):active{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--ink);}
+  .answers.locked .answer{cursor:default;}
+  .answer.is-best{background:#daffe9;border-color:#0aa85a;}
+  .answer.is-best .a-key{background:var(--green);}
+  .answer.is-chosen-bad{background:#ffe0ec;border-color:var(--pink);}
+  .answer .a-mark{margin-left:auto;font-size:22px;opacity:0;transform:scale(0);transition:.25s cubic-bezier(.22,1.6,.5,1);}
+  .answer.is-best .a-mark,.answer.is-chosen-bad .a-mark{opacity:1;transform:scale(1);}
+
+  .reveal{margin-top:16px;border:3px dashed var(--ink);border-radius:18px;background:var(--cream);padding:14px 16px;display:none;animation:pop .4s cubic-bezier(.22,1.6,.5,1) both;}
+  .reveal.show{display:block;}
+  .reveal .r-head{font-family:'Bangers',cursive;font-size:22px;letter-spacing:1px;margin-bottom:4px;}
+  .reveal .r-head.good{color:#0aa85a;}
+  .reveal .r-head.bad{color:var(--pink);}
+  .reveal .r-fact{font-weight:700;font-size:15.5px;line-height:1.45;}
+  .reveal .r-fact b{background:linear-gradient(transparent 60%, var(--gold) 60%);}
+
+  .float-pts{position:fixed;z-index:65;font-family:'Bangers',cursive;font-size:34px;color:var(--green);text-shadow:2px 2px 0 var(--ink);pointer-events:none;animation:flyup 1s ease-out forwards;}
+  @keyframes flyup{0%{opacity:0;transform:translateY(0) scale(.6);}20%{opacity:1;}100%{opacity:0;transform:translateY(-80px) scale(1.25);}}
+
+  /* ---------- RESULT ---------- */
+  .result-head{text-align:center;}
+  .score-big{font-family:'Bangers',cursive;font-size:clamp(70px,22vw,120px);line-height:.9;color:var(--pink);text-shadow:4px 4px 0 var(--ink),-2px -2px 0 var(--sky);display:flex;align-items:baseline;justify-content:center;gap:8px;}
+  .score-big .pct{font-size:.5em;color:var(--ink);text-shadow:2px 2px 0 var(--sky);}
+  .score-cap{font-weight:900;text-transform:uppercase;letter-spacing:2px;font-size:14px;color:var(--purple);margin-top:-4px;}
+  .persona-name{font-family:'Bangers',cursive;font-size:clamp(30px,8vw,46px);letter-spacing:1px;line-height:1;margin:10px 0 2px;color:var(--sky-deep);}
+  .persona-img-wrap{position:relative;display:grid;place-items:center;margin:10px 0;}
+  .persona-img-wrap .ring{position:absolute;width:230px;height:230px;border-radius:50%;
+    background:repeating-conic-gradient(from 0deg,var(--gold) 0 10deg,transparent 10deg 20deg);
+    opacity:.45;animation:spin 24s linear infinite;
+    -webkit-mask-image:radial-gradient(circle,#000 40%,transparent 68%);mask-image:radial-gradient(circle,#000 40%,transparent 68%);}
+  .persona-img{position:relative;width:240px;max-width:66vw;filter:drop-shadow(4px 6px 0 rgba(21,26,58,.22));animation:stampIn .6s cubic-bezier(.22,1.6,.4,1) both;}
+  @keyframes stampIn{0%{opacity:0;transform:scale(1.6) rotate(-8deg);}60%{opacity:1;}100%{opacity:1;transform:scale(1) rotate(-2deg);}}
+  .persona-blurb{font-weight:700;font-size:16px;line-height:1.5;text-align:center;margin:8px 4px 0;}
+
+  .radar-card{margin-top:18px;}
+  .radar-card h3,.facts-card h3{font-family:'Bangers',cursive;font-size:24px;letter-spacing:1px;margin:0 0 10px;text-align:center;}
+  svg.radar{width:100%;max-width:340px;display:block;margin:0 auto;overflow:visible;}
+  .radar-ring{fill:none;stroke:var(--ink);stroke-opacity:.18;stroke-width:1.5;}
+  .radar-axis{stroke:var(--ink);stroke-opacity:.25;stroke-width:1.5;}
+  .radar-shape{fill:rgba(255,61,139,.32);stroke:var(--pink);stroke-width:4;stroke-linejoin:round;filter:drop-shadow(2px 2px 0 rgba(21,26,58,.3));}
+  .radar-dot{fill:var(--gold);stroke:var(--ink);stroke-width:2;}
+  .radar-label{font-weight:900;font-size:12px;fill:var(--ink);}
+  .radar-emoji{font-size:19px;}
+
+  .facts-card{margin-top:18px;}
+  .facts-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;}
+  .facts-list li{display:flex;gap:10px;font-weight:700;font-size:15px;line-height:1.4;background:var(--cream);border:2.5px solid var(--ink);border-radius:14px;padding:10px 12px;box-shadow:2px 2px 0 var(--ink);}
+  .facts-list li .fe{font-size:22px;line-height:1;}
+
+  .result-actions{display:flex;flex-direction:column;gap:10px;margin-top:20px;}
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(120%);z-index:80;
+    background:var(--ink);color:#fff;font-weight:800;padding:12px 20px;border-radius:14px;box-shadow:var(--shadow-sm);transition:transform .35s cubic-bezier(.22,1.5,.4,1);}
+  .toast.show{transform:translateX(-50%) translateY(0);}
+
+  .footer{text-align:center;margin-top:28px;font-weight:800;font-size:12px;color:var(--ink);opacity:.6;}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.001s !important;}
+  }
+</style>
+</head>
+<body>
+<div class="bg-blobs"><span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span><span class="blob b4"></span></div>
+<canvas id="confetti"></canvas>
+<button id="soundBtn" title="Sound on/off" aria-label="Toggle sound">🔊</button>
+
+<div class="wrap">
+
+  <!-- ============ START ============ -->
+  <section id="screen-start" class="screen active">
+    <div class="hero-badge">
+      <div class="sunrays"></div>
+      <img class="mascot" src="assets/img/mascot-eagle.png" alt="Kazakh eagle mascot" />
+    </div>
+    <h1 class="title">HOW <span class="k">KAZAKH</span><br/>ARE YOU?</h1>
+    <p class="subtitle">12 questions. One official verdict. <span class="wink">No Borat jokes… okay maybe one.</span> 🇰🇿</p>
+    <div class="card">
+      <label class="field-label" for="nameInput">What should we call you, batyr?</label>
+      <input id="nameInput" type="text" maxlength="24" placeholder="Your name…" autocomplete="off" />
+      <button id="startBtn" class="btn pink pulse">LET'S GO ➜</button>
+      <div class="tag-row">
+        <span class="tag">☕ Hospitality</span>
+        <span class="tag">🍖 Feast</span>
+        <span class="tag">🦅 Nomad spirit</span>
+        <span class="tag">🏔️ The land</span>
+      </div>
+    </div>
+    <div class="footer">Made with 💛💙 for the team · pop-art edition</div>
+  </section>
+
+  <!-- ============ QUIZ ============ -->
+  <section id="screen-quiz" class="screen">
+    <div class="progress-wrap">
+      <div class="progress-track"><div id="progressFill" class="progress-fill"></div></div>
+      <div class="q-count"><b id="qNow">1</b>/<span id="qTotal">12</span></div>
+    </div>
+    <div class="card">
+      <div id="qEmoji" class="q-emoji">🌍</div>
+      <div id="qDim" class="q-dim">The Land</div>
+      <h2 id="qText" class="q-text">Question…</h2>
+      <div id="answers" class="answers"></div>
+      <div id="reveal" class="reveal">
+        <div id="revealHead" class="r-head"></div>
+        <div id="revealFact" class="r-fact"></div>
+      </div>
+      <button id="nextBtn" class="btn sky" style="display:none;">NEXT ➜</button>
+    </div>
+  </section>
+
+  <!-- ============ RESULT ============ -->
+  <section id="screen-result" class="screen">
+    <div class="card result-head">
+      <div class="score-cap" id="scoreName">You are…</div>
+      <div class="score-big"><span id="scoreNum">0</span><span class="pct">%</span></div>
+      <div class="score-cap">Kazakhstani</div>
+      <div class="persona-name" id="personaName">—</div>
+      <div class="persona-img-wrap">
+        <div class="ring"></div>
+        <img id="personaImg" class="persona-img" src="" alt="Your Kazakhstani persona" />
+      </div>
+      <p class="persona-blurb" id="personaBlurb"></p>
+    </div>
+
+    <div class="card radar-card">
+      <h3>Your Kazakhstani DNA 🧬</h3>
+      <svg class="radar" id="radar" viewBox="0 0 300 300" role="img" aria-label="Radar chart of your scores"></svg>
+    </div>
+
+    <div class="card facts-card">
+      <h3>Kazakhstan, real quick 🇰🇿</h3>
+      <ul class="facts-list" id="factsList"></ul>
+    </div>
+
+    <div class="result-actions">
+      <button id="shareBtn" class="btn gold">📋 COPY MY RESULT</button>
+      <button id="againBtn" class="btn sky">🔁 PLAY AGAIN</button>
+    </div>
+    <div class="footer">Share your % and make your teammates panic 😏</div>
+  </section>
+
+</div>
+
+<div id="toast" class="toast">Copied! ✨</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------- DATA ---------------- */
+  var DIMS = {
+    land:   {label:"The Land", emoji:"🏔️"},
+    hosp:   {label:"Hospitality", emoji:"☕"},
+    food:   {label:"Feast", emoji:"🍖"},
+    trad:   {label:"Traditions", emoji:"🎉"},
+    nomad:  {label:"Nomad Spirit", emoji:"🦅"}
+  };
+  var DIM_ORDER = ["food","hosp","trad","land","nomad"]; // radar order (clockwise from top)
+
+  // best answer is the one with max pts. pts out of 10.
+  var QUESTIONS = [
+    { emoji:"🌍", dim:"land",
+      q:"First things first — where on Earth is Kazakhstan?",
+      options:[
+        {t:"Somewhere in the Middle East", pts:1},
+        {t:"Central Asia — the world's LARGEST landlocked country", pts:10},
+        {t:"Eastern Europe, next to Poland", pts:1},
+        {t:"Wherever Borat said it was 🎬", pts:0}
+      ],
+      fact:"Kazakhstan is the <b>9th largest country on Earth</b> — bigger than all of Western Europe — yet it touches no ocean. It's the biggest landlocked country in the world." },
+
+    { emoji:"☕", dim:"hosp",
+      q:"You're a guest. You've had 3 cups of tea. The host reaches for the pot again. You…",
+      options:[
+        {t:"Politely say \"no more, thank you\"", pts:3},
+        {t:"Accept — refusing tea here is basically a crime", pts:10},
+        {t:"Ask for an espresso instead", pts:1}
+      ],
+      fact:"In Kazakh homes the tea never stops. The cup is filled only <b>half-full on purpose</b> — a full cup quietly means \"time to go\", half-full means \"stay and talk\"." },
+
+    { emoji:"🍖", dim:"food",
+      q:"Beshbarmak is the national dish. How do you eat it properly?",
+      options:[
+        {t:"Knife and fork, like a civilised human", pts:2},
+        {t:"With your five fingers — that's literally its name ✋", pts:10},
+        {t:"Chopsticks 🥢", pts:0},
+        {t:"I'd skip it, I'm vegan 🥗", pts:1}
+      ],
+      fact:"<b>Beshbarmak means \"five fingers\"</b> — boiled meat (often horse or lamb) over flat noodles, traditionally eaten by hand from a shared platter. The name is the instructions." },
+
+    { emoji:"🎉", dim:"trad",
+      q:"Your friend just bought a car. In Kazakhstan, the correct response is to throw a…",
+      options:[
+        {t:"Small dinner for close friends", pts:4},
+        {t:"TOI — a giant feast for 100+ people, minimum", pts:10},
+        {t:"Nothing, it's just a car", pts:1}
+      ],
+      fact:"A <b>toi</b> is a Kazakh celebration for almost any milestone — new baby, new home, new car, a kid finishing school. Weddings routinely feed 300+ guests." },
+
+    { emoji:"🐴", dim:"food",
+      q:"There's one drink that separates tourists from locals. It is…",
+      options:[
+        {t:"Fermented mare's milk — kumys 🥛", pts:10},
+        {t:"Vodka", pts:2},
+        {t:"Bubble tea", pts:0},
+        {t:"Camel milk (shubat) — honestly also correct 🐫", pts:8}
+      ],
+      fact:"<b>Kumys</b> (fermented mare's milk) is fizzy, sour and slightly alcoholic — and beloved. <b>Shubat</b> (camel milk) is its desert cousin. Both are packed with probiotics." },
+
+    { emoji:"🪕", dim:"trad",
+      q:"This two-stringed wooden instrument is the soul of Kazakh music:",
+      options:[
+        {t:"The dombra", pts:10},
+        {t:"The balalaika (that's Russian!)", pts:2},
+        {t:"A ukulele", pts:0}
+      ],
+      fact:"The <b>dombra</b> is Kazakhstan's national instrument — two strings, endless soul. There's even a <b>National Dombra Day</b> every July." },
+
+    { emoji:"👟", dim:"hosp",
+      q:"You walk into a Kazakh family's apartment. First thing you do:",
+      options:[
+        {t:"Keep your shoes on and stroll in", pts:0},
+        {t:"Take your shoes off at the door", pts:10},
+        {t:"Wait awkwardly until someone tells you", pts:5}
+      ],
+      fact:"<b>Shoes always come off at the door.</b> Homes stay spotless and there are usually house slippers waiting for guests. Keeping shoes on is a rookie mistake." },
+
+    { emoji:"🍎", dim:"land",
+      q:"That apple you ate today? Thank Kazakhstan, because…",
+      options:[
+        {t:"Apples were first grown wild near Almaty", pts:10},
+        {t:"Kazakhstan grows more apples than anyone", pts:3},
+        {t:"No real reason — nice try", pts:0}
+      ],
+      fact:"The wild ancestor of <b>every apple</b>, Malus sieversii, still grows in the mountains around Almaty — whose old name, <b>Alma-Ata, means \"father of apples\"</b>." },
+
+    { emoji:"🐎", dim:"nomad",
+      q:"Humans first tamed THIS animal on the Kazakh steppe ~5,500 years ago:",
+      options:[
+        {t:"The horse", pts:10},
+        {t:"The camel 🐫", pts:3},
+        {t:"The dog 🐕", pts:1},
+        {t:"The wolf 🐺", pts:1}
+      ],
+      fact:"The <b>Botai people</b> of northern Kazakhstan were among the first to <b>domesticate horses</b> (~3500 BC) — riding and milking them, and changing human history forever." },
+
+    { emoji:"🦅", dim:"nomad",
+      q:"Traditional Kazakh hunters ride across the steppe hunting with trained…",
+      options:[
+        {t:"Golden eagles", pts:10},
+        {t:"Falcons", pts:4},
+        {t:"Drones 🚁", pts:0},
+        {t:"Cheetahs", pts:1}
+      ],
+      fact:"<b>Berkutchi</b> — Kazakh eagle hunters — hunt foxes and hares with golden eagles that can weigh <b>7 kg</b>. Many hunters release their eagle back to the wild after years together." },
+
+    { emoji:"🏙️", dim:"land",
+      q:"Kazakhstan's capital city is…",
+      options:[
+        {t:"Almaty (the old one)", pts:4},
+        {t:"Astana — the futuristic capital that got renamed twice", pts:10},
+        {t:"Nur-Sultan", pts:6},
+        {t:"Tashkent (wrong country!)", pts:0}
+      ],
+      fact:"<b>Astana</b> is a purpose-built, ultra-futuristic capital on the steppe. It was renamed <b>Nur-Sultan in 2019… then switched back to Astana in 2022.</b> Keep up." },
+
+    { emoji:"🍲", dim:"trad",
+      q:"Nauryz — the spring new year — is celebrated by cooking…",
+      options:[
+        {t:"Nauryz-kozhe, a soup with 7 special ingredients", pts:10},
+        {t:"A birthday cake", pts:1},
+        {t:"Nothing, just fireworks", pts:2}
+      ],
+      fact:"<b>Nauryz</b> (March 21–22) welcomes spring. Families cook <b>Nauryz-kozhe</b>, a soup of 7 ingredients symbolising luck, and everyone visits everyone." }
+  ];
+
+  var PERSONAS = [
+    { min:0,  name:"Freshly Landed Tourist", emoji:"🧳", img:"assets/img/persona-tourist.png",
+      blurb:"You just landed and you're holding the map upside down. But hey — you showed up, and in Kazakhstan a guest is sacred. Grab some tea, we've got a LOT to show you." },
+    { min:25, name:"Curious Guest", emoji:"👀", img:"assets/img/persona-curious.png",
+      blurb:"You're asking the right questions and you've braved the tea. A few more toi invitations and you'll be one of us. Keep going!" },
+    { min:45, name:"Honorary Dastarkhan Guest", emoji:"🍽️", img:"assets/img/persona-dastarkhan.png",
+      blurb:"You've earned a permanent seat at the table. You know the food, you respect the elders, and you'd never refuse a second helping. Honorary local: granted." },
+    { min:65, name:"Certified City Qazaq", emoji:"😎", img:"assets/img/persona-city.png",
+      blurb:"Sunglasses on, coffee in hand, Astana skyline behind you — you're basically a local. You just might need to brush up on the old folk songs." },
+    { min:85, name:"True Nomad Ağa", emoji:"🦅", img:"assets/img/persona-nomad.png",
+      blurb:"Steppe blood, eagle on your arm, dombra in your soul. You ARE Kazakhstan. Apart apples and kumys flow through your veins. Alga!" }
+  ];
+
+  var HIGHLIGHT_FACTS = [
+    {e:"🌍", t:"Kazakhstan is the <b>9th largest country</b> in the world — and the largest with no coastline."},
+    {e:"🍎", t:"The apple was <b>born here</b> — wild ancestors still grow near Almaty, \"father of apples\"."},
+    {e:"🐎", t:"Humans may have <b>first ridden horses</b> on the Kazakh steppe ~5,500 years ago."},
+    {e:"🚀", t:"<b>Baikonur Cosmodrome</b> in Kazakhstan launched the first satellite and the first human into space."},
+    {e:"🦅", t:"Eagle hunters still ride the mountains with <b>golden eagles</b> — a tradition centuries old."}
+  ];
+
+  /* ---------------- STATE ---------------- */
+  var state = { name:"", idx:0, total:0, maxTotal:0, dim:{}, dimMax:{}, muted:false };
+  QUESTIONS.forEach(function(q){
+    var best = Math.max.apply(null, q.options.map(function(o){return o.pts;}));
+    q._best = best;
+    state.maxTotal += best;
+    state.dimMax[q.dim] = (state.dimMax[q.dim]||0) + best;
+  });
+
+  /* ---------------- HELPERS ---------------- */
+  function $(id){return document.getElementById(id);}
+  function show(screen){
+    ["screen-start","screen-quiz","screen-result"].forEach(function(s){
+      $(s).classList.toggle("active", s===screen);
+    });
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+
+  /* ---------------- AUDIO (WebAudio, no files) ---------------- */
+  var ac=null;
+  function audio(){ if(!ac){ try{ ac=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } return ac; }
+  function beep(freq,dur,type,vol,when){
+    if(state.muted) return;
+    var c=audio(); if(!c) return;
+    var t0=c.currentTime+(when||0);
+    var o=c.createOscillator(), g=c.createGain();
+    o.type=type||"triangle"; o.frequency.value=freq;
+    g.gain.setValueAtTime(0.0001,t0);
+    g.gain.exponentialRampToValueAtTime(vol||0.18,t0+0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+    o.connect(g); g.connect(c.destination);
+    o.start(t0); o.stop(t0+dur+0.02);
+  }
+  function sfxClick(){ beep(520,0.08,"square",0.10); }
+  function sfxGood(){ beep(660,0.12,"triangle",0.16); beep(880,0.16,"triangle",0.16,0.09); beep(1180,0.2,"triangle",0.14,0.18); }
+  function sfxMeh(){ beep(300,0.16,"sawtooth",0.10); beep(230,0.2,"sawtooth",0.09,0.1); }
+  function sfxWin(){
+    var notes=[523,659,784,1047,1319]; notes.forEach(function(n,i){ beep(n,0.28,"triangle",0.18,i*0.11); });
+    beep(1568,0.5,"triangle",0.14,0.55);
+  }
+
+  /* ---------------- CONFETTI (canvas, no libs) ---------------- */
+  var cvs=$("confetti"), ctx=cvs.getContext("2d"), parts=[], raf=null, DPR=Math.min(window.devicePixelRatio||1,2);
+  var COLORS=["#12b5e5","#ffd100","#ff3d8b","#7c4dff","#26e07a","#ffffff"];
+  function sizeCanvas(){ cvs.width=innerWidth*DPR; cvs.height=innerHeight*DPR; ctx.setTransform(DPR,0,0,DPR,0,0); }
+  sizeCanvas(); addEventListener("resize",sizeCanvas);
+  function confettiBurst(count,cx,cy){
+    cx = cx==null? innerWidth/2 : cx; cy = cy==null? innerHeight*0.35 : cy;
+    for(var i=0;i<count;i++){
+      var a=Math.random()*Math.PI*2, sp=4+Math.random()*9;
+      parts.push({
+        x:cx, y:cy,
+        vx:Math.cos(a)*sp, vy:Math.sin(a)*sp-4,
+        g:0.16+Math.random()*0.12,
+        s:6+Math.random()*8,
+        rot:Math.random()*6.28, vr:(Math.random()-0.5)*0.4,
+        col:COLORS[(Math.random()*COLORS.length)|0],
+        shape:(Math.random()*3)|0, life:0, max:90+Math.random()*50
+      });
+    }
+    if(!raf) loop();
+  }
+  function drawStar(x,y,r){
+    ctx.beginPath();
+    for(var i=0;i<5;i++){
+      var a=i*(Math.PI*2/5)-Math.PI/2;
+      ctx.lineTo(x+Math.cos(a)*r, y+Math.sin(a)*r);
+      var a2=a+Math.PI/5;
+      ctx.lineTo(x+Math.cos(a2)*r*0.5, y+Math.sin(a2)*r*0.5);
+    }
+    ctx.closePath(); ctx.fill();
+  }
+  function loop(){
+    ctx.clearRect(0,0,innerWidth,innerHeight);
+    for(var i=parts.length-1;i>=0;i--){
+      var p=parts[i];
+      p.vy+=p.g; p.x+=p.vx; p.y+=p.vy; p.vx*=0.99; p.rot+=p.vr; p.life++;
+      var alpha=Math.max(0,1-(p.life/p.max));
+      ctx.save(); ctx.globalAlpha=alpha; ctx.translate(p.x,p.y); ctx.rotate(p.rot); ctx.fillStyle=p.col;
+      if(p.shape===0){ ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s*0.6); }
+      else if(p.shape===1){ ctx.beginPath(); ctx.arc(0,0,p.s/2,0,6.28); ctx.fill(); }
+      else { drawStar(0,0,p.s*0.7); }
+      ctx.restore();
+      if(p.life>=p.max || p.y>innerHeight+40) parts.splice(i,1);
+    }
+    if(parts.length){ raf=requestAnimationFrame(loop); } else { ctx.clearRect(0,0,innerWidth,innerHeight); raf=null; }
+  }
+
+  /* ---------------- QUIZ FLOW ---------------- */
+  function renderQuestion(){
+    var q=QUESTIONS[state.idx];
+    $("qNow").textContent=state.idx+1;
+    $("qTotal").textContent=QUESTIONS.length;
+    $("progressFill").style.width=((state.idx)/QUESTIONS.length*100)+"%";
+    $("qEmoji").textContent=q.emoji;
+    $("qDim").textContent=DIMS[q.dim].emoji+" "+DIMS[q.dim].label;
+    $("qText").textContent=q.q;
+
+    // re-trigger emoji pop
+    var em=$("qEmoji"); em.style.animation="none"; void em.offsetWidth; em.style.animation="";
+
+    var wrap=$("answers"); wrap.innerHTML=""; wrap.classList.remove("locked");
+    var keys=["A","B","C","D"];
+    q.options.forEach(function(o,i){
+      var b=document.createElement("button");
+      b.className="answer";
+      b.innerHTML='<span class="a-key">'+keys[i]+'</span><span class="a-txt">'+o.t+'</span><span class="a-mark"></span>';
+      b.addEventListener("click",function(ev){ onAnswer(i,b,ev); });
+      wrap.appendChild(b);
+    });
+
+    var rv=$("reveal"); rv.classList.remove("show");
+    $("nextBtn").style.display="none";
+  }
+
+  function onAnswer(i,btn,ev){
+    var q=QUESTIONS[state.idx];
+    var wrap=$("answers");
+    if(wrap.classList.contains("locked")) return;
+    wrap.classList.add("locked");
+
+    var pts=q.options[i].pts;
+    var isBest = pts===q._best;
+    state.total += pts;
+    state.dim[q.dim] = (state.dim[q.dim]||0) + pts;
+
+    // mark answers
+    var btns=wrap.querySelectorAll(".answer");
+    btns.forEach(function(b,bi){
+      var mark=b.querySelector(".a-mark");
+      if(q.options[bi].pts===q._best){ b.classList.add("is-best"); mark.textContent="✅"; }
+      if(bi===i && !isBest){ b.classList.add("is-chosen-bad"); mark.textContent="🤏"; }
+    });
+
+    // floating points
+    if(pts>0){
+      var fp=document.createElement("div");
+      fp.className="float-pts"; fp.textContent="+"+pts;
+      var x=(ev&&ev.clientX)||innerWidth/2, y=(ev&&ev.clientY)||innerHeight/2;
+      fp.style.left=(x-10)+"px"; fp.style.top=(y-30)+"px";
+      document.body.appendChild(fp); setTimeout(function(){fp.remove();},1000);
+    }
+
+    // sound + confetti
+    if(isBest){ sfxGood(); confettiBurst(26,(ev&&ev.clientX)||innerWidth/2,(ev&&ev.clientY)||innerHeight*0.4); }
+    else { sfxMeh(); }
+
+    // reveal
+    var head=$("revealHead"), fact=$("revealFact");
+    if(isBest){ head.className="r-head good"; head.textContent="✅ Spot on! +"+pts; }
+    else { head.className="r-head bad"; head.textContent="🤏 Not quite ("+pts+" pts) — here's the deal:"; }
+    fact.innerHTML=q.fact;
+    $("reveal").classList.add("show");
+
+    var nb=$("nextBtn");
+    nb.textContent = state.idx===QUESTIONS.length-1 ? "SEE MY RESULT 🏆" : "NEXT ➜";
+    nb.style.display="";
+  }
+
+  function nextQuestion(){
+    sfxClick();
+    if(state.idx < QUESTIONS.length-1){
+      state.idx++;
+      renderQuestion();
+      window.scrollTo({top:0,behavior:"smooth"});
+    } else {
+      showResult();
+    }
+  }
+
+  /* ---------------- RESULT ---------------- */
+  function showResult(){
+    var pct = Math.round(state.total/state.maxTotal*100);
+    $("scoreName").textContent = (state.name? state.name+", you are…" : "You are…");
+
+    // persona
+    var p=PERSONAS[0];
+    for(var i=0;i<PERSONAS.length;i++){ if(pct>=PERSONAS[i].min) p=PERSONAS[i]; }
+    $("personaName").textContent = p.emoji+" "+p.name;
+    $("personaImg").src = p.img;
+    $("personaBlurb").textContent = p.blurb;
+
+    // facts
+    var fl=$("factsList"); fl.innerHTML="";
+    HIGHLIGHT_FACTS.forEach(function(f){
+      var li=document.createElement("li");
+      li.innerHTML='<span class="fe">'+f.e+'</span><span>'+f.t+'</span>';
+      fl.appendChild(li);
+    });
+
+    state._pct=pct; state._persona=p;
+    show("screen-result");
+
+    // animate count up
+    countUp($("scoreNum"), pct, 1400);
+    // radar
+    drawRadar();
+    setTimeout(animateRadar, 250);
+    // celebration
+    sfxWin();
+    setTimeout(function(){ confettiBurst(120); },150);
+    setTimeout(function(){ confettiBurst(80, innerWidth*0.25, innerHeight*0.3); },600);
+    setTimeout(function(){ confettiBurst(80, innerWidth*0.75, innerHeight*0.3); },900);
+  }
+
+  function countUp(el,to,dur){
+    var start=null;
+    function step(ts){
+      if(!start) start=ts;
+      var t=Math.min(1,(ts-start)/dur);
+      var eased=1-Math.pow(1-t,3);
+      el.textContent=Math.round(eased*to);
+      if(t<1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  /* ---------------- RADAR (hand-drawn SVG) ---------------- */
+  var CX=150, CY=150, R=100;
+  function ptFor(idx,frac){
+    var n=DIM_ORDER.length;
+    var a=(-Math.PI/2)+(idx*2*Math.PI/n);
+    return [CX+Math.cos(a)*R*frac, CY+Math.sin(a)*R*frac];
+  }
+  function polyStr(frac){
+    return DIM_ORDER.map(function(d,i){ var p=ptFor(i,frac); return p[0].toFixed(1)+","+p[1].toFixed(1); }).join(" ");
+  }
+  function drawRadar(){
+    var svg=$("radar"); var ns="http://www.w3.org/2000/svg"; svg.innerHTML="";
+    // rings
+    [0.25,0.5,0.75,1].forEach(function(f){
+      var pg=document.createElementNS(ns,"polygon");
+      pg.setAttribute("points",polyStr(f)); pg.setAttribute("class","radar-ring"); svg.appendChild(pg);
+    });
+    // axes + labels
+    DIM_ORDER.forEach(function(d,i){
+      var end=ptFor(i,1);
+      var ln=document.createElementNS(ns,"line");
+      ln.setAttribute("x1",CX);ln.setAttribute("y1",CY);ln.setAttribute("x2",end[0]);ln.setAttribute("y2",end[1]);
+      ln.setAttribute("class","radar-axis"); svg.appendChild(ln);
+      var lp=ptFor(i,1.28);
+      var em=document.createElementNS(ns,"text");
+      em.setAttribute("x",lp[0]);em.setAttribute("y",lp[1]-2);em.setAttribute("text-anchor","middle");
+      em.setAttribute("class","radar-emoji"); em.textContent=DIMS[d].emoji; svg.appendChild(em);
+      var tx=document.createElementNS(ns,"text");
+      tx.setAttribute("x",lp[0]);tx.setAttribute("y",lp[1]+13);tx.setAttribute("text-anchor","middle");
+      tx.setAttribute("class","radar-label"); tx.textContent=DIMS[d].label; svg.appendChild(tx);
+    });
+    // shape + dots (start collapsed)
+    var shape=document.createElementNS(ns,"polygon");
+    shape.setAttribute("id","radarShape"); shape.setAttribute("class","radar-shape");
+    shape.setAttribute("points",polyStr(0)); svg.appendChild(shape);
+    DIM_ORDER.forEach(function(d,i){
+      var c=document.createElementNS(ns,"circle");
+      c.setAttribute("id","radarDot"+i); c.setAttribute("r","4.5"); c.setAttribute("class","radar-dot");
+      c.setAttribute("cx",CX); c.setAttribute("cy",CY); svg.appendChild(c);
+    });
+  }
+  function animateRadar(){
+    var targets=DIM_ORDER.map(function(d){
+      var mx=state.dimMax[d]||1, v=state.dim[d]||0; return Math.max(0.04, v/mx);
+    });
+    var dur=900, start=null;
+    function step(ts){
+      if(!start) start=ts;
+      var t=Math.min(1,(ts-start)/dur), e=1-Math.pow(1-t,3);
+      var pts=DIM_ORDER.map(function(d,i){ var p=ptFor(i,targets[i]*e); return p[0].toFixed(1)+","+p[1].toFixed(1); });
+      var shape=$("radarShape"); if(shape) shape.setAttribute("points",pts.join(" "));
+      DIM_ORDER.forEach(function(d,i){
+        var p=ptFor(i,targets[i]*e); var dot=$("radarDot"+i);
+        if(dot){ dot.setAttribute("cx",p[0]); dot.setAttribute("cy",p[1]); }
+      });
+      if(t<1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  /* ---------------- SHARE ---------------- */
+  function shareResult(){
+    sfxClick();
+    var who=state.name? state.name+" is" : "I'm";
+    var txt=who+" "+state._pct+"% Kazakhstani — \""+state._persona.name+"\" "+state._persona.emoji+"! 🇰🇿 How Kazakh are YOU? "+location.href;
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(showToast, function(){ fallbackCopy(txt); });
+    } else { fallbackCopy(txt); }
+  }
+  function fallbackCopy(txt){
+    var ta=document.createElement("textarea"); ta.value=txt; document.body.appendChild(ta); ta.select();
+    try{ document.execCommand("copy"); showToast(); }catch(e){} ta.remove();
+  }
+  var toastTimer=null;
+  function showToast(){
+    var t=$("toast"); t.classList.add("show");
+    clearTimeout(toastTimer); toastTimer=setTimeout(function(){ t.classList.remove("show"); },1900);
+  }
+
+  /* ---------------- WIRING ---------------- */
+  $("startBtn").addEventListener("click",function(){
+    audio(); // unlock on gesture
+    state.name=($("nameInput").value||"").trim().slice(0,24);
+    state.idx=0; state.total=0; state.dim={};
+    sfxClick();
+    renderQuestion();
+    show("screen-quiz");
+  });
+  $("nameInput").addEventListener("keydown",function(e){ if(e.key==="Enter") $("startBtn").click(); });
+  $("nextBtn").addEventListener("click",nextQuestion);
+  $("shareBtn").addEventListener("click",shareResult);
+  $("againBtn").addEventListener("click",function(){ sfxClick(); show("screen-start"); });
+  $("soundBtn").addEventListener("click",function(){
+    state.muted=!state.muted;
+    this.textContent=state.muted?"🔇":"🔊";
+    if(!state.muted){ audio(); sfxClick(); }
+  });
+
+})();
+</script>
+</body>
+</html>
